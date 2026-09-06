@@ -116,3 +116,20 @@ MoBrowser App Icon Maker のUIを「鉱石ラジオの回路図（スケマテ�
 - 7セグLED数字表示
 - 発振回路アニメーション (待機中)
 - ろう付け痕のテクスチャ
+
+## 実装状況 (1.0.2 改修)
+
+| 項目 | 状態 | ファイル |
+|------|------|----------|
+| 背景配線 SVG | ✅ | circuit-wires.tsx |
+| アナログVUメーター | ✅ | analog-meter.tsx (針は支点(64,68)の view-box 回転で補正済み) |
+| バリコン (プロンプト入力) | ✅ | prompt-input.tsx |
+| ダイオード (Generate ボタン) | ✅ | prompt-input.tsx (submit 時 triangle+bar, signal-pulse) |
+| アンテナ/アース (API Key) | ✅ | prompt-input.tsx |
+| イヤホン (Save) | ✅ | app-content.tsx (Headphones アイコン + SAVE) |
+| LC並列共振 (バリアント3種) | ✅ | variant-picker.tsx (LC1〜LC3 タグ) |
+| 掃引線 / trace-draw アニメ | ✅ | blueprint-face.tsx / circuit-wires.tsx |
+| 配線・グリッド銅色化 | ✅ | index.css / blueprint-face.tsx |
+
+> 注: `npm run gen` は macOS x64 未対応のためこの環境で実行不可。tsc の残エラー
+> は `gen/` 生成物が無い事に起因する既存のもののみ。

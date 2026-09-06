@@ -1,12 +1,5 @@
 import { useRef, type ChangeEvent, type KeyboardEvent } from "react"
-import {
-  ArrowUp,
-  ChevronRight,
-  ImagePlus,
-  RefreshCw,
-  Settings2,
-  X,
-} from "lucide-react"
+import { ChevronRight, ImagePlus, RefreshCw, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export type PrimaryAction = "submit" | "stop" | "refresh" | "select"
@@ -151,7 +144,22 @@ export function PromptInput({
               title="OpenAI API key"
               aria-label="OpenAI API key settings"
             >
-              <Settings2 className="w-4 h-4" />
+              {/* Antenna + ground (アンテナ / アース) */}
+              <svg
+                width="16"
+                height="18"
+                viewBox="0 0 16 18"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M8 1 V8" />
+                <path d="M8 4 L4 2 M8 4 L12 2 M8 7 L5 9 M8 7 L11 9" />
+                <path d="M3 11 h10 M5 13 h6 M7 15 h2" />
+              </svg>
             </button>
 
             {/* Inline attachment thumbnails — same row, no height change. */}
@@ -225,7 +233,23 @@ export function PromptInput({
                 <span className="w-2.5 h-2.5 rounded-[1px] bg-current" aria-hidden />
               )}
               {primaryAction === "refresh" && <RefreshCw className="w-4 h-4" strokeWidth={2.5} />}
-              {primaryAction === "submit" && <ArrowUp className="w-4 h-4" strokeWidth={2.5} />}
+              {primaryAction === "submit" && (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.3"
+                  strokeLinejoin="round"
+                  className={cn(primaryEnabled && "signal-pulse")}
+                  aria-hidden
+                >
+                  <polygon points="1.5,1.5 1.5,12.5 7,7" />
+                  <line x1="7" y1="1.5" x2="7" y2="12.5" />
+                  <line x1="10" y1="1.5" x2="10" y2="12.5" />
+                </svg>
+              )}
               {primaryAction === "select" && (
                 <>
                   <span>SELECT</span>

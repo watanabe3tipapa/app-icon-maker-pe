@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Download } from "lucide-react"
+import { Headphones } from "lucide-react"
 import { MacOSIcon } from "@/components/macos-icon"
 import {
   OpenAIApiKeyManageModal,
@@ -268,7 +268,7 @@ export function AppContent() {
               : "border-border/30 text-muted-foreground/30 cursor-not-allowed"
           )}
         >
-          <Download className="w-3.5 h-3.5" />
+          <Headphones className="w-3.5 h-3.5" />
           SAVE
         </button>
       </div>

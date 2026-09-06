@@ -36,7 +36,12 @@ export function AnalogMeter({
   if (!visible) return null
 
   const angle = fractionToAngle(Math.min(1, Math.max(0, fraction)))
-  const needleEnd = polarToCartesian(CX, CY, RADIUS - 8, angle)
+  const restAngle = fractionToAngle(0)
+  // The needle is drawn at its rest position and rotated around its pivot
+  // (CX, CY+4) in view-box space — SVG CSS transforms default to the viewport
+  // origin (0,0), so a plain `rotate()` without an origin would swing wildly.
+  const rotation = angle - restAngle
+  const needleEnd = polarToCartesian(CX, CY + 4, RADIUS - 8, restAngle)
   const pct = Math.round(fraction * 100)
 
   const ticks: { angle: number; major: boolean }[] = []
@@ -107,7 +112,7 @@ export function AnalogMeter({
           )
         })}
 
-        {/* Needle */}
+        {/* Needle — drawn at rest (-120°) and rotated around its pivot. */}
         <g>
           <line
             x1={CX}
@@ -118,10 +123,16 @@ export function AnalogMeter({
             strokeWidth="1.5"
             strokeLinecap="round"
             className={cn(fraction > 0 && !isError && "needle-live")}
-            style={{
-              "--needle-rest": `${fractionToAngle(0)}deg`,
-              "--needle-peak": `${angle}deg`,
-            } as React.CSSProperties}
+            style={
+              {
+                transform: `rotate(${rotation}deg)`,
+                transition: "transform 0.3s ease-out",
+                transformBox: "view-box",
+                transformOrigin: `${CX}px ${CY + 4}px`,
+                "--needle-rest": "0deg",
+                "--needle-peak": `${rotation}deg`,
+              } as React.CSSProperties
+            }
           />
           <circle cx={CX} cy={CY + 4} r="3" fill="#d4a843" />
           <circle cx={CX} cy={CY + 4} r="1.5" fill="#121212" />

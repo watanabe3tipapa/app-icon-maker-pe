@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react"
+
 export function CircuitWires() {
   return (
     <svg
@@ -46,7 +48,9 @@ export function CircuitWires() {
         strokeWidth="1.5"
         fill="none"
         strokeLinejoin="round"
-        opacity="0.5"
+        pathLength={100}
+        className="trace-animate"
+        style={{ "--trace-length": "100" } as CSSProperties}
       />
 
       {/* Diode symbol (between prompt and icon) */}
