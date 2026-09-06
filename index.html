@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>App Icon Maker PE — AI で macOS アプリアイコンを育てる</title>
+  <meta name="description" content="AI と対話しながら macOS アプリアイコンを生成・育成し、.icns / .iconset で書き出すデスクトップアプリ。" />
+  <link rel="icon" href="./assets/app.png" />
+  <style>
+    :root {
+      --bg: #17130d;
+      --bg-soft: #1e1811;
+      --panel: #221a12;
+      --copper: #b87333;
+      --gold: #d4a843;
+      --solder: #c0c0c0;
+      --diode: #e8734a;
+      --green: #4a7a4a;
+      --fg: #d9cdb9;
+      --fg-soft: #9b8f7a;
+      --fg-dim: #6f6656;
+      --line: rgba(212, 168, 67, 0.16);
+      --grid: rgba(180, 140, 80, 0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 36px 36px;
+      color: var(--fg);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .mono { font-family: ui-monospace, "SF Mono", "Menlo", Consolas, monospace; }
+
+    .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ---------- nav ---------- */
+    nav {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(8px);
+      background: rgba(23, 19, 13, 0.82);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.02em; }
+    .brand img { width: 26px; height: 26px; }
+    .brand .accent { color: var(--gold); }
+    .nav-links { display: flex; gap: 20px; font-size: 13px; }
+    .nav-links a { color: var(--fg-soft); }
+    .nav-links a:hover { color: var(--gold); text-decoration: none; }
+
+    /* ---------- hero ---------- */
+    header {
+      padding: 88px 0 64px;
+      text-align: center;
+      position: relative;
+    }
+    .overline {
+      display: inline-block;
+      font-size: 12px; letter-spacing: 0.3em;
+      color: var(--copper);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 14px;
+      margin-bottom: 22px;
+      background: rgba(184, 115, 51, 0.06);
+    }
+    h1 { font-size: clamp(34px, 6vw, 52px); letter-spacing: -0.01em; line-height: 1.15; }
+    h1 .pe { color: var(--gold); }
+    .tagline { margin-top: 16px; font-size: clamp(15px, 2.4vw, 18px); color: var(--fg-soft); }
+    .tagline strong { color: var(--fg); }
+    .sub { max-width: 640px; margin: 18px auto 0; color: var(--fg-soft); font-size: 14.5px; }
+    .hero-actions { margin-top: 30px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 20px; border-radius: 999px;
+      font-size: 13.5px; font-weight: 600; letter-spacing: 0.02em;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); text-decoration: none; }
+    .btn-primary {
+      background: var(--gold); color: #17130d;
+    }
+    .btn-primary:hover { background: #e5bd55; }
+    .btn-ghost { border: 1px solid var(--line); color: var(--fg); }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+    .hero-icon { margin: 44px auto 0; width: 132px; height: 132px; }
+    .hero-icon img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 40px rgba(212, 168, 67, 0.25)); }
+
+    /* ---------- section ---------- */
+    section { padding: 64px 0; border-top: 1px solid var(--line); }
+    .sec-label { font-size: 11px; letter-spacing: 0.28em; color: var(--copper); margin-bottom: 10px; }
+    h2 { font-size: clamp(24px, 4vw, 32px); letter-spacing: -0.01em; margin-bottom: 28px; }
+
+    /* ---------- live demo ---------- */
+    .demo-box {
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(rgba(212, 168, 67, 0.04), rgba(212, 168, 67, 0.04)),
+        var(--bg-soft);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .demo-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; border-bottom: 1px solid var(--line);
+      font-size: 12px; color: var(--fg-soft); font-family: ui-monospace, monospace;
+    }
+    .demo-header .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .demo-header .d1 { background: #e8734a; }
+    .demo-header .d2 { background: var(--gold); }
+    .demo-header .d3 { background: var(--green); }
+    .demo-header .title { margin-left: 6px; letter-spacing: 0.06em; }
+    .demo-header .live {
+      margin-left: auto; color: var(--diode); font-weight: 600;
+      animation: blink 1.6s ease-in-out infinite;
+      letter-spacing: 0.16em;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+    .demo-box video { display: block; width: 100%; height: auto; background: #000; }
+
+    /* ---------- features ---------- */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .card {
+      border: 1px solid var(--line); border-radius: 12px;
+      padding: 22px; background: var(--panel);
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .card:hover { border-color: rgba(212, 168, 67, 0.4); transform: translateY(-2px); }
+    .card .sym { font-size: 20px; color: var(--gold); font-family: ui-monospace, monospace; }
+    .card h3 { font-size: 15px; margin: 10px 0 6px; letter-spacing: 0.01em; }
+    .card p { font-size: 13px; color: var(--fg-soft); }
+
+    /* ---------- specs table ---------- */
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--panel); }
+    th, td { text-align: left; padding: 13px 18px; border-bottom: 1px solid var(--line); }
+    th { color: var(--gold); font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: 0.1em; }
+    tr:last-child td { border-bottom: none; }
+    td code { color: var(--diode); font-family: ui-monospace, monospace; font-size: 12.5px; }
+
+    /* ---------- steps ---------- */
+    .steps { display: flex; flex-direction: column; gap: 14px; }
+    .step { display: flex; gap: 16px; align-items: flex-start; }
+    .step .num {
+      flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--gold); color: var(--gold);
+      font-family: ui-monospace, monospace; font-size: 13px; font-weight: 600;
+    }
+    .step .body h3 { font-size: 14.5px; margin-bottom: 2px; }
+    .step .body p { font-size: 13px; color: var(--fg-soft); }
+
+    .note {
+      margin-top: 28px; font-size: 12.5px; color: var(--fg-dim);
+      border: 1px dashed var(--line); border-radius: 10px; padding: 14px 16px;
+    }
+
+    /* ---------- footer ---------- */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 36px 0 48px;
+      font-size: 12.5px; color: var(--fg-dim);
+      text-align: center;
+    }
+    footer .mono { color: var(--fg-soft); }
+    footer a { color: var(--fg-soft); }
+    footer a:hover { color: var(--gold); }
+
+    @media (max-width: 560px) {
+      header { padding: 64px 0 44px; }
+      section { padding: 48px 0; }
+      .nav-links { gap: 12px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top">
+        <img src="./assets/app.png" alt="App Icon Maker PE" />
+        App Icon Maker <span class="accent">PE</span>
+      </a>
+      <div class="nav-links">
+        <a href="#demo">Live Demo</a>
+        <a href="#features">Features</a>
+        <a href="#specs">Specs</a>
+        <a href="#usage">Usage</a>
+        <a href="https://github.com/watanabe3tipapa/app-icon-maker-pe" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <header id="top">
+    <div class="wrap">
+      <span class="overline mono">macOS APP ICON GENERATOR</span>
+      <h1>App Icon Maker <span class="pe">PE</span></h1>
+      <p class="tagline"><strong>アイコンは、作るものではなく育てるもの。</strong></p>
+      <p class="sub">
+        AI との対話を重ねながら macOS アプリアイコンを育て、<span class="mono">.icns</span> / <span class="mono">.iconset</span>
+        を書き出すデスクトップアプリ。生成 → 選ぶ → 磨く → 保存、の反復で納得の一点に仕上げます。
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#demo">▶ Live Demo</a>
+        <a class="btn btn-ghost" href="https://github.com/watanabe3tipapa/app-icon-maker-pe/releases" target="_blank" rel="noopener">Releases</a>
+        <a class="btn btn-ghost" href="https://github.com/watanabe3tipapa/app-icon-maker-pe" target="_blank" rel="noopener">View on GitHub</a>
+      </div>
+      <div class="hero-icon"><img src="./assets/app.png" alt="App icon preview" /></div>
+    </div>
+  </header>
+
+  <!-- ================= Live Demo ================= -->
+  <section id="demo">
+    <div class="wrap">
+      <div class="sec-label mono">LIVE DEMO</div>
+      <h2>実際の操作感をそのまま動画で</h2>
+      <div class="demo-box">
+        <div class="demo-header">
+          <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+          <span class="title">app-icon-maker-demo.mp4</span>
+          <span class="live mono">● LIVE</span>
+        </div>
+        <video controls autoplay loop muted playsinline preload="metadata" src="./app-icon-maker-demo.mp4"></video>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Features ================= -->
+  <section id="features">
+    <div class="wrap">
+      <div class="sec-label mono">FEATURES</div>
+      <h2>主な特徴</h2>
+      <div class="grid">
+        <div class="card"><div class="sym">├┤ バリコン</div><h3>プロンプト生成</h3><p>テキストを書いて Enter。固定のシステム制約で macOS らしい構図に収まります。</p></div>
+        <div class="card"><div class="sym">▼| ダイオード</div><h3>3 バリアント</h3><p>1 回の生成で 3 案を提示。横並びで素早く比較できます。</p></div>
+        <div class="card"><div class="sym">◉ イヤホン</div><h3>refine ワークフロー</h3><p>選んだアイコンを次回の基準にバトンタッチして、磨き上げ続けられます。</p></div>
+        <div class="card"><div class="sym">⎇ アンテナ</div><h3>参考画像</h3><p>スケッチや以前のレンダリングを添えて、構図やスタイルを指定できます。</p></div>
+        <div class="card"><div class="sym">▦ メーター</div><h3>.icns / .iconset</h3><p>全標準サイズのアイコンセットを書き出し。マスクは macOS 側で適用。</p></div>
+        <div class="card"><div class="sym">〜 回路図</div><h3>回路図風 UI</h3><p>鉱石ラジオのスケマティック装飾。VU メーター・バリコン・LC 共振タグ。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Specs ================= -->
+  <section id="specs">
+    <div class="wrap">
+      <div class="sec-label mono">SPECS</div>
+      <h2>前提条件</h2>
+      <div class="table-wrap">
+        <table>
+          <tr><th>ツール</th><th>必要バージョン</th><th>確認コマンド</th></tr>
+          <tr><td>macOS</td><td>14 (Apple Silicon) 以降</td><td><code>sw_vers</code></td></tr>
+          <tr><td>Node.js</td><td>24.14.1 (LTS) 以降</td><td><code>node --version</code></td></tr>
+          <tr><td>MōBrowser</td><td>2.7.1 以降</td><td><code>mobrowser --version</code></td></tr>
+          <tr><td>AI バックエンド</td><td>OpenAI API キー</td><td>—</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Usage ================= -->
+  <section id="usage">
+    <div class="wrap">
+      <div class="sec-label mono">USAGE</div>
+      <h2>使い方</h2>
+      <div class="steps">
+        <div class="step"><div class="num">1</div><div class="body"><h3>説明を書く</h3><p>例）<span class="mono">"blue clipboard with folded corner"</span></p></div></div>
+        <div class="step"><div class="num">2</div><div class="body"><h3>参考画像を添える（任意）</h3><p>構図・スタイルの方向性を模型に伝えます。</p></div></div>
+        <div class="step"><div class="num">3</div><div class="body"><h3>Generate（Enter）</h3><p>3 つのプレビューが生成されます。</p></div></div>
+        <div class="step"><div class="num">4</div><div class="body"><h3>バリアントを選んで磨く</h3><p>選択したアイコンを基準に refine モードで再生成します。</p></div></div>
+        <div class="step"><div class="num">5</div><div class="body"><h3>Save</h3><p>.icns と .iconset を保存。Finder で即確認できます。</p></div></div>
+      </div>
+      <div class="note">
+        <span class="mono">npm install</span> → <span class="mono">npm run dev</span>&nbsp;&nbsp;（API 不要の UI 確認は <span class="mono">npm run dev:mock</span>）
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="mono">App Icon Maker PE · v0.1.0</div>
+      <div style="margin-top:10px">
+        <a href="https://github.com/watanabe3tipapa/app-icon-maker-pe" target="_blank" rel="noopener">GitHub</a> ·
+        <a href="https://github.com/watanabe3tipapa/app-icon-maker-pe/releases" target="_blank" rel="noopener">Releases</a> ·
+        <a href="https://github.com/watanabe3tipapa/app-icon-maker-pe/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <div style="margin-top:10px">
+        本プロジェクトは <a href="https://github.com/TeamDev-IP/MoBrowser-App-Icon-Maker" target="_blank" rel="noopener">MoBrowser-App-Icon-Maker</a> の派生版（personal edition）です。
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
