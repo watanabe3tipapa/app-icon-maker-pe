@@ -11,6 +11,8 @@ import { ErrorModal, generationErrorSuggestsApiKeyIssue } from "@/components/err
 import { SaveSuccessModal } from "@/components/save-success-modal"
 import { SquircleClipDefs } from "@/components/squircle-clip-defs"
 import { TitleBarStatus } from "@/components/title-bar-status"
+import { CircuitWires } from "@/components/circuit-wires"
+import { AnalogMeter } from "@/components/analog-meter"
 import type { IconState } from "@/components/icon-types"
 import { useIconPipeline } from "@/lib/icon-pipeline"
 import { ipc } from "@/gen/ipc"
@@ -193,6 +195,9 @@ export function AppContent() {
     <div className="dark flex flex-col h-screen bg-background text-foreground overflow-hidden">
       <SquircleClipDefs />
 
+      {/* Circuit diagram background wires */}
+      <CircuitWires />
+
       {errorMessage && (
         <ErrorModal
           message={errorMessage}
@@ -233,7 +238,15 @@ export function AppContent() {
       {/* macOS traffic-light spacer (also serves as the drag region). */}
       <div className="draggable" />
 
-      {/* Compact title-bar status: progress line + label. */}
+      {/* Analog VU meter for generation status */}
+      <AnalogMeter
+        fraction={pipeline.progress.fraction}
+        label={pipeline.progress.label}
+        isError={pipeline.status === "error"}
+        visible={pipeline.status === "downloading" || pipeline.status === "generating" || pipeline.status === "error"}
+      />
+
+      {/* Legacy status bar for download progress line */}
       {showStatus && (
         <TitleBarStatus
           label={pipeline.progress.label}
@@ -242,20 +255,21 @@ export function AppContent() {
         />
       )}
 
-      {/* Save button — top right corner. */}
-      <div className="absolute top-3 right-3 z-50">
+      {/* Save / earphone button — top right corner. */}
+      <div className="absolute top-3 right-3 z-50 non-draggable">
         <button
           disabled={!canSave}
           onClick={handleSave}
           className={cn(
-            "flex items-center gap-2 px-4 h-8 rounded-lg text-sm font-medium transition-all duration-200 non-draggable",
+            "flex items-center gap-2 px-3 h-8 rounded-lg text-xs font-medium transition-all duration-200",
+            "border",
             canSave
-              ? "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.97] shadow-md"
-              : "bg-secondary/30 text-muted-foreground/40 cursor-not-allowed"
+              ? "border-[#d4a843]/40 bg-[#d4a843]/10 text-[#d4a843] hover:bg-[#d4a843]/20 active:scale-[0.97]"
+              : "border-border/30 text-muted-foreground/30 cursor-not-allowed"
           )}
         >
           <Download className="w-3.5 h-3.5" />
-          Save
+          SAVE
         </button>
       </div>
 
